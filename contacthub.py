@@ -223,9 +223,6 @@ def edit_contact():
     note = st.text_area("Notes", value=st.session_state.note)
 
     if st.button("Save Changes"):
-        st.write("Button Clicked")
-        st.write(f"Selected Contact ID: {st.session_state.selected_contact}")  
-
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -235,7 +232,6 @@ def edit_contact():
                 (name, number, job_title, gender, note, email, st.session_state.selected_contact)
             )
             conn.commit()
-            st.write(f"Rows Affected: {cursor.rowcount}")
 
             if cursor.rowcount > 0:
                 st.success("✅ Contact updated successfully!")
@@ -250,7 +246,7 @@ def edit_contact():
             conn.close()
 
         st.session_state.editing = False
-        time.sleep(1)  
+        time.sleep(1.5)  
         st.rerun()
 
 

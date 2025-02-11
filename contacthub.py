@@ -26,7 +26,7 @@ def main():
         st.markdown(
             """
             <style>
-                div[class="st-b0 st-eq st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"],div[class ="st-b0 st-c2 st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"]{
+                div[class="st-b0 st-eq st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"],div[class ="st-b0 st-c1 st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"]{
                     display: none !important;
                 }
                 div[role="radiogroup"] p:hover {
@@ -158,20 +158,27 @@ def contact_details():
     cursor.execute("SELECT * FROM contacts WHERE contact_id = %s", (st.session_state.selected_contact,))
     contact = cursor.fetchone()
     conn.close()
+
     st.title(contact["name"])
-    st.write(f"**Number:** {contact["number"]}")
-    st.write(f"**Email:** {contact["email"]}")
-    st.write(f"**Job Title:** {contact["job_title"]}")
-    st.write(f"**Gender:** {contact["gender"]}")
-    st.write(f"**Notes:** {contact["note"]}")
-    
+    st.write(f"**Number:** {contact['number']}")
+    st.write(f"**Email:** {contact['email']}")
+    st.write(f"**Job Title:** {contact['job_title']}")
+    st.write(f"**Gender:** {contact['gender']}")
+    st.write(f"**Notes:** {contact['note']}")
+
     col1, col2 = st.columns(2)
+    
     with col1:
         if st.button("Edit Contact"):
-            edit_contact()
+            st.session_state.editing = True  
+
     with col2:
         if st.button("Remove Contact"):
             remove_contact()
+
+    if st.session_state.get("editing", False):
+        edit_contact()
+
 
 def edit_contact():
     if "selected_contact" not in st.session_state or not st.session_state.selected_contact:
@@ -181,28 +188,30 @@ def edit_contact():
     if "contact_data" not in st.session_state or st.session_state.selected_contact != st.session_state.get("contact_id"):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         try:
             cursor.execute("SELECT * FROM contacts WHERE contact_id = %s", (st.session_state.selected_contact,))
             contact = cursor.fetchone()
+            if not contact:
+                st.error("⚠ Contact not found!")
+                return
+
+            # Store fetched data in session state
+            st.session_state.contact_id = st.session_state.selected_contact
+            st.session_state.name = contact["name"]
+            st.session_state.number = contact["number"]
+            st.session_state.job_title = contact["job_title"] or ""
+            st.session_state.gender = contact["gender"] if contact["gender"] in ["M", "F", "N"] else "N"
+            st.session_state.email = contact["email"] or ""
+            st.session_state.note = contact["note"] or ""
+
         except mysql.connector.Error as err:
             st.error(f"Database error: {err}")
-            return
         finally:
+            cursor.close()
             conn.close()
 
-        if not contact:
-            st.error("⚠ Contact not found!")
-            return
-
-        st.session_state.contact_id = st.session_state.selected_contact
-        st.session_state.name = contact["name"]
-        st.session_state.number = contact["number"]
-        st.session_state.job_title = contact["job_title"] or ""
-        st.session_state.gender = contact["gender"] if contact["gender"] in ["M", "F", "N"] else "N"
-        st.session_state.email = contact["email"] or ""
-        st.session_state.note = contact["note"] or ""
-
+    # Editable fields
     name = st.text_input("Name", value=st.session_state.name)
     number = st.text_input("Number", value=st.session_state.number)
     job_title = st.text_input("Job Title", value=st.session_state.job_title)
@@ -214,32 +223,36 @@ def edit_contact():
     note = st.text_area("Notes", value=st.session_state.note)
 
     if st.button("Save Changes"):
+        st.write("Button Clicked")
+        st.write(f"Selected Contact ID: {st.session_state.selected_contact}")  
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        
+
         try:
             cursor.execute(
                 "UPDATE contacts SET name=%s, number=%s, job_title=%s, gender=%s, note=%s, email=%s WHERE contact_id=%s",
                 (name, number, job_title, gender, note, email, st.session_state.selected_contact)
             )
             conn.commit()
-            st.success("✅ Contact updated successfully!")
+            st.write(f"Rows Affected: {cursor.rowcount}")
+
+            if cursor.rowcount > 0:
+                st.success("✅ Contact updated successfully!")
+                st.session_state.updated = True 
+            else:
+                st.warning("⚠ No changes detected or invalid contact ID.")
+
         except mysql.connector.Error as err:
             st.error(f"⚠ Database error: {err}")
         finally:
+            cursor.close()
             conn.close()
 
-        st.session_state.name = name
-        st.session_state.number = number
-        st.session_state.job_title = job_title
-        st.session_state.gender = gender
-        st.session_state.email = email
-        st.session_state.note = note
-
-        del st.session_state.selected_contact
-        del st.session_state.contact_id
-
+        st.session_state.editing = False
+        time.sleep(1)  
         st.rerun()
+
 
 def remove_contact():
     conn = get_db_connection()
@@ -308,7 +321,7 @@ def export_contacts():
     df.to_csv(csv_buffer, index=False, encoding="utf-8")
     
     st.download_button(
-        label="📥 Download Contacts for Google Contacts",
+        label="📥 Download Contacts CSV",
         data=csv_buffer.getvalue(),
         file_name="google_contacts.csv",
         mime="text/csv"

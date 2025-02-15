@@ -32,11 +32,16 @@
    ```bash
    pip install -r requirements.txt
    ```  
-3️. Set up **MySQL database** (import `schema.sql`)  
+3️. Set up **MySQL database** (import `schema.sql`) 
+
 4️. Run the app:  
    ```bash
-   streamlit run app.py
-   ```  
+   streamlit run contacthub.py
+   ```
+or
+  ```bash
+   python -m streamlit run contacthub.py
+   ``` 
 
 ---
 

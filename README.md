@@ -25,7 +25,7 @@
 
 1️. Clone the repository:  
    ```bash
-   git clone https://github.com/joshivedant7/contacthub-streamlit-python.git
+   git clone https://github.com/vemacitrind/contacthub-streamlit-python.git
    cd ContactHub
    ```  
 2️. Install dependencies:  

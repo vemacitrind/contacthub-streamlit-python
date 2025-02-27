@@ -26,13 +26,14 @@ def main():
         st.markdown(
             """
             <style>
-                div[class="st-b0 st-eq st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"],div[class ="st-b0 st-c1 st-e8 st-e9 st-ea st-eb st-ec st-ag st-ed st-bv st-ee st-av st-ef st-au st-bi st-eg st-eh st-ei st-bg st-co"]{
+                label .st-b0{
                     display: none !important;
                 }
                 div[role="radiogroup"] p:hover {
-                    color: rgb(255, 75, 75);
+                    # color: rgb(255, 75, 75);
                     font-weight: bold;
-                    transform: scale(1.5);
+                    transform: scale(1.2);
+                    margin-left:10px;
                 }
                 div[role="radiogroup"] p {
                     margin-bottom:20px;
@@ -42,7 +43,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
-
         tabs = ["Contacts", "Add Contact", "Import Contact", "Export Contact"]
         active_tab = st.sidebar.radio("Navigation", tabs, label_visibility="collapsed")
 
@@ -181,7 +181,6 @@ def contact_details():
     if st.session_state.get("editing", False):
         edit_contact()
 
-
 def edit_contact():
     if "selected_contact" not in st.session_state or not st.session_state.selected_contact:
         st.error("⚠ No contact selected!")
@@ -250,7 +249,6 @@ def edit_contact():
         st.session_state.editing = False
         time.sleep(1.5)  
         st.rerun()
-
 
 def remove_contact():
     conn = get_db_connection()

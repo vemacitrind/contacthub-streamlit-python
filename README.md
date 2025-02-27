@@ -52,5 +52,5 @@ or
 ---
 
  **Enjoy managing your contacts efficiently!**  
- **GitHub Repo**: [https://github.com/joshivedant7/contacthub-streamlit-python]
+ **GitHub Repo**: [https://github.com/vemacitrind/contacthub-streamlit-python]
 

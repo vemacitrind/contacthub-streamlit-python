@@ -80,12 +80,14 @@ def signup_page():
 
     username_pattern = r'^[A-Za-z0-9_]+$'
     email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-
+    password_pattern = r'^.{6,}$'
     if st.button("Register"):
         if not re.match(username_pattern, new_username):
             st.error("Username can only contain letters, numbers, and underscores.")
         elif not re.match(email_pattern, email):
             st.error("Invalid email format.")
+        elif not re.match(password_pattern, new_password):
+            st.error("Password must be at least 6 characters long.")
         elif new_password != confirm_password:
             st.error("Passwords do not match.")
         else:
